@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [[ `id -un` == 'root' ]]; then
+    echo "Must not be executed under root"
+    exit 1
+fi
+
+
+echo -e "\nStarting MongoDB db1...";
+mongod --dbpath /mnt/db1/data/ --logpath /mnt/var/mongodb/db1/log/mongodb.log --logappend --fork
+ps x | grep [m]ongod &>/dev/null
+if [[ $? != 0 ]]; then
+    echo -e "FAILED\n"
+    exit 1
+fi
+echo "SUCCESS"
+
+
+echo -e "\nStarting RabbitMQ..."
+rabbitmq-server -detached
+sleep 10
+rabbitmqctl status
+if [ $? != 0 ]; then
+    echo "FAILED"
+    exit 1
+fi
+echo "SUCCESS"
+
+
+echo -e "\nStarting SMPPSim..."
+pushd /opt/SMPPSim &>/dev/null
+./startsmppsim.sh &>/dev/null &
+popd >/dev/null &>/dev/null
+echo "SUCCESS"
+
+echo "All started"
+
+exit 0

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+if [[ `id -un` == 'root' ]]; then
+    echo "Must not be executed under root"
+    exit 1
+fi
+
+echo -e "\nStarting Funnel..."
+/opt/funnel/bin/funnel start
+sleep 5
+F=`/opt/funnel/bin/funnel ping`
+if [[ $F != 'pong' ]]; then
+    echo $F
+    echo "FAILED"
+    exit 1
+fi
+echo "SUCCESS"
+
+echo -e "\nStarting Kelly..."
+/opt/kelly/bin/kelly start
+sleep 5
+K=`/opt/kelly/bin/kelly ping`
+if [[ $K != 'pong' ]]; then
+    echo $K
+    echo "FAILED"
+    exit 1
+fi
+echo "SUCCESS"
+
+echo -e "\nStarting Just..."
+/opt/just/bin/just start
+sleep 15
+J=`/opt/just/bin/just ping`
+if [[ $J != 'pong' ]]; then
+    echo $J
+    echo "FAILED"
+    exit 1
+fi
+echo "SUCCESS"
+
+echo -e "\nStarting Billy..."
+/opt/billy/bin/billy start
+sleep 5
+BILLY_PING=$(/opt/billy/bin/billy ping)
+if [[ "$BILLY_PING" != "pong" ]]; then
+    echo $BILLY_PING
+    echo "FAILED"
+    exit 1
+fi
+echo "SUCCESS"
+
+
+echo "All started"
+
+exit 0

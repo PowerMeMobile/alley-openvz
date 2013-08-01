@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# INFO
+# creates instance of alley env template,
+# starts it and runs alley test
+
+. files/config
+
+if [[ "$(id -u)" != "0" ]]; then
+	echo Need to be root
+	exit 1
+fi
+echo root OK
+
+vzctl create $CTID --ostemplate $ALLEY_TPL
+if [[ "$?" != "0" ]];then
+    echo failed to create instance of $ALLEY_TPL template
+    exit 1
+fi
+
+vzctl set $CTID --ipadd $CTIP --diskspace 15G:15G --nameserver $CTNS --save
+if [[ "$?" != "0" ]];then
+    echo failed to configure $CTID openvz container
+    exit 1
+fi
+
+cp files/* $CTROOT/tmp/
+if [[ "$?" != "0" ]];then
+    echo failed to copy files/* to $CTROOT/tmp/
+    exit 1
+fi
+
+mkdir -p $CTROOT/root/.ssh
+if [[ "$?" != "0" ]];then
+    echo failed to create .ssh dir
+    exit 1
+fi
+
+cat files/id_dsa.pub >> $CTROOT/root/.ssh/authorized_keys
+if [[ "$?" != "0" ]];then
+    echo failed to add id_dsa to authorized_keys
+    exit 1
+fi
+chmod 700 $CTROOT/root/.ssh
+if [[ "$?" != "0" ]];then
+    echo failed to chmode .ssh
+    exit 1
+fi
+chmod 600 $CTROOT/root/.ssh/authorized_keys
+if [[ "$?" != "0" ]];then
+    echo failed to chmod authorized_keys
+    exit 1
+fi
+ssh-keygen -R $CTIP
+if [[ "$?" != "0" ]];then
+    echo failed to delete $CTIP fingerprint
+    exit 1
+fi
+
+vzctl start $CTID
+if [[ "$?" != "0" ]];then
+    echo failed to start $CTID openvz container
+    exit 1
+fi
+
+sleep 3
+
+ssh root@$CTIP -i files/id_dsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '. /etc/profile; /tmp/test-alley &> /tmp/test-alley.log'
+if [[ "$?" != "0" ]];then
+    echo alley test failed
+    exit 1
+fi
+
+vzctl stop $CTID
+if [[ "$?" != "0" ]];then
+    echo failed to stop $CTID openvz container
+    exit 1
+fi
+
+NOW=$(date +"%y%m%d%H%M%S")
+
+cp $CTROOT/tmp/test-alley.log test-alley-$NOW.log
+if [[ "$?" != "0" ]];then
+    echo failed to copy logs
+    exit 1
+fi
+
+vzctl destroy $CTID
+if [[ "$?" != "0" ]];then
+    echo failed to destroy $CTID openvz container
+    exit 1
+fi
+
+echo 
+echo Ready!
+exit 0

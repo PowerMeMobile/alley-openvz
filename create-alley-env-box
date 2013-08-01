@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# TODO: delete nameserver form /etc/resolve.conf
+
+. files/config
+
+if [[ ! "$(which vzctl)" ]];then echo setup OpenVZ; exit 1; fi
+
+SHARED_DIR=$ALLEY_TPL/$TMP_DIR
+SETUP_SCRIPT=setup-centos.sh
+
+if [[ "$(id -u)" != "0" ]]; then
+	echo Need to be root
+	exit 1
+fi
+echo root OK
+
+# http://download.openvz.org/template/precreated/
+if [[ ! -f "$TPL.tar.gz" ]]; then
+    echo the $TPL.tar.gz file does not exist
+    wget http://download.openvz.org/template/precreated/$TPL.tar.gz
+    if [[ "$?" != "0" ]]; then echo failed to fetch template; exit 1; fi
+fi
+echo os template OK
+
+mkdir $ALLEY_TPL
+if [[ "$?" != "0" ]];then
+	echo failed to create $ALLEY_TPL dir
+	exit 1
+fi
+echo create $ALLEY_TPL OK
+
+echo -n unpack os template...
+tar -xzpf $TPL.tar.gz -C $ALLEY_TPL
+if [[ "$?" != "0" ]];then
+	echo failed to extract $TPL.tar.gz to $ALLEY_TPL
+	exit 1
+fi
+echo OK
+
+mkdir -p $SHARED_DIR
+if [[ "$?" != "0" ]];then
+	echo failed to create $SHARED_DIR directory
+	exit 1
+fi
+echo create shared dir OK
+
+cp files/* $SHARED_DIR
+if [[ "$?" != "0" ]];then
+	echo failed to copy files to shared $SHARED_DIR directory
+	exit 1
+fi
+echo copy files to shared dir OK
+
+mount -t proc none $ALLEY_TPL/proc
+if [[ "$?" != "0" ]];then
+	echo failed to mount proc to $ALLEY_TPL/proc
+	exit 1
+fi
+echo mount proc OK
+
+chroot $ALLEY_TPL /bin/bash -c "echo nameserver $CTNS >> /etc/resolv.conf"
+if [[ "$?" != "0" ]];then
+	echo failed to setup nameserver
+	exit 1
+fi
+echo setup nameserver OK
+
+echo -n start setup in $ALLEY_TPL...
+chroot $ALLEY_TPL /bin/bash -c "$TMP_DIR/$SETUP_SCRIPT &> $TMP_DIR/$SETUP_SCRIPT.log"
+if [[ "$?" != "0" ]];then
+	echo failed to setup $ALLEY_TPL
+	exit 1
+fi
+echo OK
+
+# fuser -k $ALLEY_TPL/
+# if [[ "$?" != "0" ]];then
+# 	echo failed to kill all process in $ALLEY_TPL/
+# 	exit 1
+# fi
+echo kill all process in $ALLEY_TPL/ OK
+
+echo -n umount $ALLEY_TPL/proc...
+umount $ALLEY_TPL/proc
+if [[ "$?" != "0" ]];then
+	echo failed to unmount $ALLEY_TPL/proc
+	exit 1
+fi
+echo OK
+
+echo -n create alley env template tar...
+tar -czpf  $ALLEY_TPL.tar.gz -C $ALLEY_TPL .
+if [[ "$?" != "0" ]];then
+	echo failed to create alley env template tar
+	exit 1
+fi
+echo OK
+
+echo remove $ALLEY_TPL dir
+rm -rf $ALLEY_TPL
+if [[ "$?" != "0" ]];then
+    echo failed to remove $ALLEY_TPL
+    exit 1
+fi
+
+echo
+echo To create instance of this template:
+echo \# mv $ALLEY_TPL.tar.gz /vz/template/cache
+echo \# vzctl create 101 --ostemplate $ALLEY_TPL
+echo \# vzctl set 101 --ipadd 192.168.0.1 --save
+echo \# vzctl set 101 --diskspace 15G:15G --save
+echo \# vzctl start 101
+echo \# vzctl enter 101
+
+echo
+echo Ready!
+exit 0

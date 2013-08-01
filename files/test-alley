@@ -1,0 +1,261 @@
+#!/bin/bash
+
+SCRIPT_DIR=$(dirname "$BASH_SOURCE")
+
+. $SCRIPT_DIR/config
+. /etc/profile
+
+# setup kelly
+
+git clone --branch=$KELLY_BRANCH --depth=1 --quiet $KELLY_REP $KELLY_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to fetch kelly
+    exit 1
+fi
+
+make -C $KELLY_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to build kelly
+    exit 1
+fi
+
+cp -r $KELLY_REL_DIR $OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to cp -r $KELLY_REL_DIR $OPT_DIR
+    exit 1
+fi
+chown -R $ALLEY_USER:$ALLEY_USER $KELLY_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to chown -R $ALLEY_USER:$ALLEY_USER $KELLY_OPT_DIR
+    exit 1
+fi
+
+rm -rf $KELLY_VAR_DATA_DIR && mv $KELLY_OPT_DATA_DIR $KELLY_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $KELLY_OPT_DATA_DIR $KELLY_VAR_DIR
+    exit 1
+fi
+rm -rf $KELLY_VAR_LOG_DIR && mv $KELLY_OPT_LOG_DIR $KELLY_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $KELLY_OPT_LOG_DIR $KELLY_VAR_DIR
+    exit 1
+fi
+ln -s $KELLY_VAR_DATA_DIR $KELLY_OPT_DATA_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $KELLY_VAR_DATA_DIR $KELLY_OPT_DATA_DIR
+    exit 1
+fi
+ln -s $KELLY_VAR_LOG_DIR $KELLY_OPT_LOG_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $KELLY_VAR_LOG_DIR $KELLY_OPT_LOG_DIR
+    exit 1
+fi
+
+# setup just
+
+git clone --branch=$JUST_BRANCH --depth=1 --quiet $JUST_REP $JUST_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to fetch just
+    exit 1
+fi
+
+make -C $JUST_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to build just
+    exit 1
+fi
+cp -r $JUST_REL_DIR $JUST_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to cp -r $JUST_REL_DIR $JUST_OPT_DIR
+    exit 1
+fi
+chown -R $ALLEY_USER:$ALLEY_USER $JUST_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to chown -R $ALLEY_USER:$ALLEY_USER $JUST_OPT_DIR
+    exit 1
+fi
+rm -rf $JUST_VAR_DATA_DIR && mv $JUST_OPT_DATA_DIR $JUST_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $JUST_OPT_DATA_DIR $JUST_VAR_DIR
+    exit 1
+fi
+rm -rf $JUST_VAR_LOG_DIR && mv $JUST_OPT_LOG_DIR $JUST_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $JUST_OPT_LOG_DIR $JUST_VAR_DIR
+    exit 1
+fi
+ln -s $JUST_VAR_DATA_DIR $JUST_OPT_DATA_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $JUST_VAR_DATA_DIR $JUST_OPT_DATA_DIR
+    exit 1
+fi
+ln -s $JUST_VAR_LOG_DIR $JUST_OPT_LOG_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $JUST_VAR_LOG_DIR $JUST_OPT_LOG_DIR
+    exit 1
+fi
+
+# setup ssh to fetch private repositories
+cp $TMP_DIR/rawshan_id_dsa ~/.ssh/id_rsa
+if [[ "$?" != "0" ]];then
+    echo failed to copy rsa to .ssh dir
+    exit 1
+fi
+chmod 600 ~/.ssh/id_rsa
+if [[ "$?" != "0" ]];then
+    echo failed to chmod id_rsa
+    exit 1
+fi
+# to avoid Host Key Verification Failed error
+echo -e "\n$(ssh-keyscan -t rsa github.com)" >> ~/.ssh/known_hosts
+if [[ "$?" != "0" ]];then
+    echo failed to add github.com rsa to known_hosts
+    exit 1
+fi
+
+# setup funnel
+git clone --branch=$FUNNEL_BRANCH --depth=1 --quiet $FUNNEL_REP $FUNNEL_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to fetch funnel
+    exit 1
+fi
+make -C $FUNNEL_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to build funnel
+    exit 1
+fi
+cp -r $FUNNEL_REL_DIR $FUNNEL_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to cp -r $FUNNEL_REL_DIR $FUNNEL_OPT_DIR
+    exit 1
+fi
+chown -R $ALLEY_USER:$ALLEY_USER $FUNNEL_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to chown -R $ALLEY_USER:$ALLEY_USER $FUNNEL_OPT_DIR
+    exit 1
+fi
+rm -rf $FUNNEL_VAR_DATA_DIR && mv $FUNNEL_OPT_DATA_DIR $FUNNEL_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $FUNNEL_OPT_DATA_DIR $FUNNEL_VAR_DIR
+    exit 1
+fi
+rm -rf $FUNNEL_VAR_LOG_DIR && mv $FUNNEL_OPT_LOG_DIR $FUNNEL_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $FUNNEL_OPT_LOG_DIR $FUNNEL_VAR_DIR
+    exit 1
+fi
+ln -s $FUNNEL_VAR_DATA_DIR $FUNNEL_OPT_DATA_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $FUNNEL_VAR_DATA_DIR $FUNNEL_OPT_DATA_DIR
+    exit 1
+fi
+ln -s $FUNNEL_VAR_LOG_DIR $FUNNEL_OPT_LOG_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $FUNNEL_VAR_LOG_DIR $FUNNEL_OPT_LOG_DIR
+    exit 1
+fi
+# to enable billing
+sed -i 's/false/true/g' $FUNNEL_OPT_DIR/etc/app.config
+if [[ "$?" != "0" ]];then
+    echo failed to replace flase with true in funnel app.config
+    exit 1
+fi
+
+# setup billy
+git clone --branch=$BILLY_BRANCH --depth=1 --quiet $BILLY_REP $BILLY_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to fetch billy
+    exit 1
+fi
+make -C $BILLY_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to build billy
+    exit 1
+fi
+cp -r $BILLY_REL_DIR $BILLY_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to cp -r $BILLY_REL_DIR $BILLY_OPT_DIR
+    exit 1
+fi
+chown -R $ALLEY_USER:$ALLEY_USER $BILLY_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to chown -R $ALLEY_USER:$ALLEY_USER $BILLY_OPT_DIR
+    exit 1
+fi
+mkdir -p $BILLY_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mkdir -p $BILLY_VAR_DIR
+    exit 1
+fi
+mv $BILLY_OPT_DATA_DIR $BILLY_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $BILLY_OPT_DATA_DIR $BILLY_VAR_DIR
+    exit 1
+fi
+mv $BILLY_OPT_LOG_DIR $BILLY_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $BILLY_OPT_LOG_DIR $BILLY_VAR_DIR
+    exit 1
+fi
+ln -s $BILLY_VAR_DATA_DIR $BILLY_OPT_DATA_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $BILLY_VAR_DATA_DIR $BILLY_OPT_DATA_DIR
+    exit 1
+fi
+ln -s $BILLY_VAR_LOG_DIR $BILLY_OPT_LOG_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $BILLY_VAR_LOG_DIR $BILLY_OPT_LOG_DIR
+    exit 1
+fi
+
+#configure billy to avoid funnel failure on start
+echo -n Start Billy...
+su $ALLEY_USER $BILLY_OPT_DIR/bin/billy start
+sleep 5
+BILLY_PING=$($BILLY_OPT_DIR/bin/billy ping)
+if [[ "$BILLY_PING" != "pong" ]]; then
+    echo $BILLY_PING
+    echo failed to start billy
+    exit 1
+fi
+echo OK
+$BILLY_TMP_DIR/rel/files/http_conf.sh 
+if [[ "$?" != "0" ]];then
+    echo failed to configure billy
+    exit 1
+fi
+echo -n Stop Billy...
+$BILLY_OPT_DIR/bin/billy stop
+if [[ "$?" != "0" ]]; then
+    echo failed to stop billy
+    exit 1
+fi
+echo OK
+
+# start alley env
+su $ALLEY_USER '/tmp/start-alley'
+if [[ "$?" != "0" ]];then
+    echo failed to su $ALLEY_USER '/tmp/start-alley'
+    exit 1
+fi
+
+$KELLY_TMP_DIR/rel/files/http_conf.sh 
+if [[ "$?" != "0" ]];then
+    echo failed to configure alley
+    exit 1
+fi
+
+SEND_RESULT=$(smppload -D 1 -t fun-postpaid -d 375293333333,1,1 -v 1 | grep 'Delivery success' | grep 1)
+if [[ "$SEND_RESULT" = "" ]];then
+    echo failed to send test sms via fun-postpaid
+    exit 1
+fi
+
+SEND_RESULT=$(smppload -D 1 -t fun-prepaid -u user111 -d 375293333333,1,1 -v 1 | grep 'Delivery success' | grep 1)
+if [[ "$SEND_RESULT" = "" ]];then
+    echo failed to send test sms via fun-prepaid
+    exit 1
+fi
+
+echo Ready!
+exit 0
