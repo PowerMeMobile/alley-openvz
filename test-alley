@@ -65,6 +65,11 @@ fi
 
 sleep 3
 
+chmod 600 files/id_dsa
+if [[ "$?" != "0" ]];then
+    echo failed to chmod 600 files/id_dsa
+    exit 1
+fi
 ssh root@$CTIP -i files/id_dsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '. /etc/profile; /tmp/test-alley &> /tmp/test-alley.log'
 if [[ "$?" != "0" ]];then
     echo alley test failed
