@@ -219,7 +219,7 @@ if [[ "$BILLY_PING" != "pong" ]]; then
     exit 1
 fi
 echo OK
-$BILLY_TMP_DIR/rel/files/http_conf.sh 
+$BILLY_TMP_DIR/rel/files/http_conf.sh
 if [[ "$?" != "0" ]];then
     echo failed to configure billy
     exit 1
@@ -239,7 +239,7 @@ if [[ "$?" != "0" ]];then
     exit 1
 fi
 
-$KELLY_TMP_DIR/rel/files/http_conf.sh 
+$KELLY_TMP_DIR/rel/files/http_conf.sh
 if [[ "$?" != "0" ]];then
     echo failed to configure alley
     exit 1
@@ -251,7 +251,7 @@ if [[ "$SEND_RESULT" = "" ]];then
     exit 1
 fi
 
-SEND_RESULT=$(smppload -D 1 -t fun-prepaid -u user111 -d 375293333333,1,1 -v 1 | grep 'Delivery success' | grep 1)
+SEND_RESULT=$(smppload -D 1 -t fun-prepaid -u user -d 375293333333,1,1 -v 1 | grep 'Delivery success' | grep 1)
 if [[ "$SEND_RESULT" = "" ]];then
     echo failed to send test sms via fun-prepaid
     exit 1
