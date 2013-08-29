@@ -19,7 +19,7 @@ VAR_DIR=$MNT_DIR/var
 DB1_DIR=$MNT_DIR/db1
 DB2_DIR=$MNT_DIR/db2
 
-RABBIT_VAR_DIR=$VAR_DIR/rabbitmqx
+RABBIT_VAR_DIR=$VAR_DIR/rabbitmq
 
 ALLEY_USER=vagrant
 
