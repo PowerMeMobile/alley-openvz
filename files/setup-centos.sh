@@ -39,7 +39,9 @@ screen.x86_64 \
 libuuid-devel \
 tokyocabinet-devel \
 net-snmp.x86_64 \
-htop.x86_64
+htop.x86_64 \
+sysstat.x86_64 \
+iotop.noarch
 if [[ "$?" != "0" ]]; then
     echo Failed to install deps
     exit 1
