@@ -1,0 +1,7 @@
+vzctl stop 101 #stop VM
+vzctl enter 101 #enter VM with openvz
+vzctl destroy 101 #destroy VM
+vzlist -a # list all existing VM
+ssh -i files/id_dsa 192.168.0.1 # ssh to VM
+cd /vz/private/101 # VM root dir
+tail -f /vz/private/101/tmp/test-alley.log # current test log
