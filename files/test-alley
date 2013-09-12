@@ -232,6 +232,100 @@ if [[ "$?" != "0" ]]; then
 fi
 echo OK
 
+# setup k1api
+git clone --branch=$K1API_BRANCH --depth=1 --quiet $K1API_REP $K1API_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to fetch k1api
+    exit 1
+fi
+make -C $K1API_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to build k1api
+    exit 1
+fi
+cp -r $K1API_REL_DIR $K1API_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to cp -r $K1API_REL_DIR $K1API_OPT_DIR
+    exit 1
+fi
+chown -R $ALLEY_USER:$ALLEY_USER $K1API_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to chown -R $ALLEY_USER:$ALLEY_USER $K1API_OPT_DIR
+    exit 1
+fi
+mkdir -p $K1API_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mkdir -p $K1API_VAR_DIR
+    exit 1
+fi
+mv $K1API_OPT_DATA_DIR $K1API_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $K1API_OPT_DATA_DIR $K1API_VAR_DIR
+    exit 1
+fi
+mv $K1API_OPT_LOG_DIR $K1API_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $K1API_OPT_LOG_DIR $K1API_VAR_DIR
+    exit 1
+fi
+ln -s $K1API_VAR_DATA_DIR $K1API_OPT_DATA_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $K1API_VAR_DATA_DIR $K1API_OPT_DATA_DIR
+    exit 1
+fi
+ln -s $K1API_VAR_LOG_DIR $K1API_OPT_LOG_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $K1API_VAR_LOG_DIR $K1API_OPT_LOG_DIR
+    exit 1
+fi
+
+# setup soap_srv
+git clone --branch=$SOAP_SRV_BRANCH --depth=1 --quiet $SOAP_SRV_REP $SOAP_SRV_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to fetch soap_srv
+    exit 1
+fi
+make -C $SOAP_SRV_TMP_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to build soap_srv
+    exit 1
+fi
+cp -r $SOAP_SRV_REL_DIR $SOAP_SRV_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to cp -r $SOAP_SRV_REL_DIR $SOAP_SRV_OPT_DIR
+    exit 1
+fi
+chown -R $ALLEY_USER:$ALLEY_USER $SOAP_SRV_OPT_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to chown -R $ALLEY_USER:$ALLEY_USER $SOAP_SRV_OPT_DIR
+    exit 1
+fi
+mkdir -p $SOAP_SRV_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mkdir -p $SOAP_SRV_VAR_DIR
+    exit 1
+fi
+mv $SOAP_SRV_OPT_DATA_DIR $SOAP_SRV_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $SOAP_SRV_OPT_DATA_DIR $SOAP_SRV_VAR_DIR
+    exit 1
+fi
+mv $SOAP_SRV_OPT_LOG_DIR $SOAP_SRV_VAR_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to mv $SOAP_SRV_OPT_LOG_DIR $SOAP_SRV_VAR_DIR
+    exit 1
+fi
+ln -s $SOAP_SRV_VAR_DATA_DIR $SOAP_SRV_OPT_DATA_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $SOAP_SRV_VAR_DATA_DIR $SOAP_SRV_OPT_DATA_DIR
+    exit 1
+fi
+ln -s $SOAP_SRV_VAR_LOG_DIR $SOAP_SRV_OPT_LOG_DIR
+if [[ "$?" != "0" ]];then
+    echo failed to ln -s $SOAP_SRV_VAR_LOG_DIR $SOAP_SRV_OPT_LOG_DIR
+    exit 1
+fi
+
 # start alley env
 su $ALLEY_USER '/tmp/start-alley'
 if [[ "$?" != "0" ]];then
@@ -256,6 +350,9 @@ if [[ "$SEND_RESULT" = "" ]];then
     echo failed to send test sms via fun-prepaid
     exit 1
 fi
+
+echo Run k1api tests...
+make -C $K1API_TMP_DIR api-test
 
 echo Ready!
 exit 0
