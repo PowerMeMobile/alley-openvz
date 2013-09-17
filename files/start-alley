@@ -49,6 +49,28 @@ if [[ "$BILLY_PING" != "pong" ]]; then
 fi
 echo "SUCCESS"
 
+echo -e "\nStarting K1API..."
+/opt/k1api/bin/k1api start
+sleep 5
+K=`/opt/k1api/bin/k1api ping`
+if [[ $K != 'pong' ]]; then
+    echo $K
+    echo "FAILED"
+    exit 1
+fi
+echo "SUCCESS"
+
+echo -e "\nStarting SOAP SRV..."
+/opt/soap_srv/bin/soap_srv start
+sleep 5
+K=`/opt/soap_srv/bin/soap_srv ping`
+if [[ $K != 'pong' ]]; then
+    echo $K
+    echo "FAILED"
+    exit 1
+fi
+echo "SUCCESS"
+
 
 echo "All started"
 
