@@ -76,6 +76,13 @@ if [[ "$?" != "0" ]];then
     exit 1
 fi
 
+# if anyone holds test-alley.log
+pids=`lsof 2>/dev/null | grep test-alley.log | awk '{ print $2 }'`
+if [[ "$pids" != "" ]];then
+    # kill'em all
+    kill $pids
+fi
+
 vzctl stop $CTID
 if [[ "$?" != "0" ]];then
     echo failed to stop $CTID openvz container
