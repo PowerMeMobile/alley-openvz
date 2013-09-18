@@ -354,5 +354,8 @@ fi
 echo Run k1api tests...
 make -C $K1API_TMP_DIR api-test
 
+echo Run soap_srv tests...
+make -C $SOAP_SRV_TMP_DIR api-test
+
 echo Ready!
 exit 0
